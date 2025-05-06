@@ -1,21 +1,21 @@
-# # Use the official Node.js image as the base image
-# FROM node:16
+# Use the official Node.js image as the base image
+FROM node:16
 
-# # Set the working directory in the container
-# WORKDIR /app
+# Set the working directory in the container
+WORKDIR /app
 
-# # Install dependencies
-# COPY package.json package-lock.json ./
-# RUN npm install
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
 
-# # Copy the rest of the application files
-# COPY . ./
+# Copy the rest of the application files
+COPY . ./
 
-# # Expose port 3000 for the React app to run
-# EXPOSE 3000
+# Expose port 3000 for the React app to run
+EXPOSE 3000
 
-# # Start the React app in development mode
-# CMD ["npm", "start"]
+# Start the React app in development mode
+CMD ["npm", "start"]
 
 
 # # Step 1: Build the app
@@ -45,45 +45,45 @@
 # CMD ["serve", "-s", "dist", "-l", "3000"]
 
 
-# Build stage
-FROM node:18-alpine as build
+# # Build stage
+# FROM node:18-alpine as build
 
-WORKDIR /app
+# WORKDIR /app
 
-# Copy package files first for better caching
-COPY package.json package-lock.json* ./
+# # Copy package files first for better caching
+# COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci
+# # Install dependencies
+# RUN npm ci
 
-# Copy the rest of the application
-COPY . .
+# # Copy the rest of the application
+# COPY . .
 
-# Fix any potential dependency issues
-RUN npm install vite-plugin-node-polyfills@latest --save-dev
+# # Fix any potential dependency issues
+# RUN npm install vite-plugin-node-polyfills@latest --save-dev
 
-# Build the app
-RUN npm run build
+# # Build the app
+# RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# # Production stage
+# FROM nginx:alpine
 
-# Copy built files from build stage to nginx serve directory
-COPY --from=build /app/dist /usr/share/nginx/html
+# # Copy built files from build stage to nginx serve directory
+# COPY --from=build /app/dist /usr/share/nginx/html
 
-# Create a custom nginx config that handles SPA routing
-RUN echo 'server { \
-  listen 80; \
-  location / { \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    try_files $uri $uri/ /index.html; \
-  } \
-}' > /etc/nginx/conf.d/default.conf
+# # Create a custom nginx config that handles SPA routing
+# RUN echo 'server { \
+#   listen 80; \
+#   location / { \
+#     root /usr/share/nginx/html; \
+#     index index.html; \
+#     try_files $uri $uri/ /index.html; \
+#   } \
+# }' > /etc/nginx/conf.d/default.conf
 
-# Copy .env file for environment variables if needed
-COPY .env /usr/share/nginx/html/.env
+# # Copy .env file for environment variables if needed
+# COPY .env /usr/share/nginx/html/.env
 
-EXPOSE 80
+# EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+# CMD ["nginx", "-g", "daemon off;"]
